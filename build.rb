@@ -19,16 +19,20 @@ class String
 	    	"-draw \"text #{font_size*0.05},#{font_size*0.95} '#{self}'\""
 	    ]
 
-	    puts "convert #{params.join ' '} #{Dir.pwd}/#{target_filename}"
 	    system("convert #{params.join ' '} #{Dir.pwd}/#{target_filename}")
     end
 end
 
 tempfile    = "/tmp/readme.md"
-filecontent = File.read("readme.md")
 used_quotes = []
 
+puts "read input file..."
+filecontent = File.read("readme.md")
+
+puts "rewrite quotes..."
 while filecontent.include? "IMGQUOTE" do
+	puts "\t processing quote (#{filecontent.scan('<IMGQUOTE>').size - 1} more to do)"
+
    	quote           = filecontent.string_between_markers "<IMGQUOTE>", "</IMGQUOTE>"
    	quote_md5       = Digest::MD5.hexdigest(quote)
    	screenshot_path = "quotes/#{quote_md5}.png"
@@ -57,10 +61,12 @@ all_stored_quotes.each do |file|
 	end
 end
 
+puts "write output markdown..."
 File.open(tempfile, 'w') do |file| 
 	file.write(filecontent)
 end
 
+puts "invoke pandoc..."
 include_formats=["footnotes", "fenced_code_attributes", "simple_tables", "markdown_in_html_blocks"]
 pandoc_params  =[
 	"--smart",
