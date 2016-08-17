@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 # 
 # make sure you have pandoc, imagemagick and optipng installed
-# maybe you need to adjust font_size and font_width for your system
 # if you changed these values do not push them!
 #
 require "digest/md5"
@@ -11,9 +10,11 @@ class String
 		self[/#{Regexp.escape(marker1)}(.*?)#{Regexp.escape(marker2)}/m, 1]
     end
 
-    def draw_screenshot font_size, font_width, target_filename, main_color, stroke_color
-		estimated_width = self.length * font_width
+    def draw_screenshot font_size, target_filename, main_color, stroke_color
+		estimated_width = self.length * font_size
 	    estimated_rows  = self.count("\n") + 1
+
+	    full_path = "#{Dir.pwd}/#{target_filename}"
 
 	    params = [
 	    	"-size #{estimated_width}x#{estimated_rows * font_size * 1.2}",
@@ -24,8 +25,15 @@ class String
 	    	"-draw \"text #{font_size*0.05},#{font_size*0.95} '#{self}'\""
 	    ]
 
-	    puts "\t\tinvoke imagemagick"
-	    system("convert #{params.join ' '} #{Dir.pwd}/#{target_filename}")
+	    puts "\t\tinvoke imagemagick (creation)"
+	    system("convert #{params.join ' '} #{full_path}")
+
+	    puts "\t\tinvoke imagemagick (resize)"
+	    system("convert #{full_path} -fuzz 1% -trim +repage #{full_path}.shrink.png")
+
+	    puts "\t\tget rid of tempfiles"
+	    File.delete(full_path)
+	    File.rename("#{full_path}.shrink.png", full_path)
 
 	    puts "\t\tinvoke optipng"
 	    old_size = File.size target_filename
@@ -52,12 +60,13 @@ while filecontent.include? "IMGQUOTE" do
 
     unless File.exist? screenshot_path
     	font_size  = 100
-    	font_width =  41
-    	quote.strip.draw_screenshot font_size, font_width, screenshot_path, "'#B5E853'", "black"
+    	quote.strip.draw_screenshot font_size, screenshot_path, "'#B5E853'", "black"
     end
 
+    lines = quote.strip.count("\n") + 1
+
     replacement = "> \n"+
-                  "> ![Zitat](#{screenshot_path}) \n"+
+    			  "> <img src=\"#{screenshot_path}\" style=\"height: #{lines}em\" alt=\"Zitat\" />\n"+
                   "> \n"
 
     filecontent.gsub!("<IMGQUOTE>#{quote}</IMGQUOTE>", replacement)
@@ -80,7 +89,14 @@ File.open(tempfile, 'w') do |file|
 end
 
 puts "invoke pandoc..."
-include_formats=["footnotes", "fenced_code_attributes", "simple_tables", "markdown_in_html_blocks"]
+include_formats=[
+	"footnotes", 
+	"fenced_code_attributes", 
+	"simple_tables", 
+	"markdown_in_html_blocks", 
+	"link_attributes"
+]
+
 pandoc_params  =[
 	"--smart",
 	"--toc",

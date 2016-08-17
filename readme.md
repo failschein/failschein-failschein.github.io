@@ -19,3 +19,7 @@ int main(){
 !ich Binein ganz listiges ZiTatM?jsdfjsdjhsdfsdfsdfsdfffffffffffffffffffffffffffffffffffffffsgggggggggggggggööööß
 Mehrzeilig!
 </IMGQUOTE>
+
+<IMGQUOTE>
+oder auch ganz klein
+</IMGQUOTE>
