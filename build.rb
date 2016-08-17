@@ -1,4 +1,9 @@
 #!/usr/bin/ruby
+# 
+# make sure you have pandoc, imagemagick and optipng installed
+# maybe you need to adjust font_size and font_width for your system
+# if you changed these values do not push them!
+#
 require "digest/md5"
 
 class String
@@ -19,7 +24,15 @@ class String
 	    	"-draw \"text #{font_size*0.05},#{font_size*0.95} '#{self}'\""
 	    ]
 
+	    puts "\t\tinvoke imagemagick"
 	    system("convert #{params.join ' '} #{Dir.pwd}/#{target_filename}")
+
+	    puts "\t\tinvoke optipng"
+	    old_size = File.size target_filename
+	    system("optipng -zc8-9 -zm8-9 -zs3-4 -quiet #{Dir.pwd}/#{target_filename}")
+	    new_size = File.size target_filename
+	    puts "\t\t\tsaved #{(old_size-new_size).fdiv(old_size) * 100}%"
+	    puts "\t\t\timage is now #{new_size.fdiv(1000).round} kb"
     end
 end
 
