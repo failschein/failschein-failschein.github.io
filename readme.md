@@ -15,6 +15,7 @@ int main(){
 }
 ```
 
->
-> ich bin ein zitat
->
+<IMGQUOTE>
+!ich Binein ganz listiges ZiTatM?jsdfjsdjhsdfsdfsdfsdfffffffffffffffffffffffffffffffffffffffsgggggggggggggggööööß
+Mehrzeilig!
+</IMGQUOTE>
